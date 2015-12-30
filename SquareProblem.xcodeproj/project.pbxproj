@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		76DE20901C33E4EC00F7B694 /* SquarePostionInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 76DE208F1C33E4EC00F7B694 /* SquarePostionInfo.m */; };
 		87BE99AB1C2BD14200190D28 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 87BE99AA1C2BD14200190D28 /* main.m */; };
 		87BE99AE1C2BD14200190D28 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 87BE99AD1C2BD14200190D28 /* AppDelegate.m */; };
 		87BE99B11C2BD14200190D28 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 87BE99B01C2BD14200190D28 /* ViewController.m */; };
@@ -18,6 +19,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		76DE208E1C33E4EC00F7B694 /* SquarePostionInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SquarePostionInfo.h; sourceTree = "<group>"; };
+		76DE208F1C33E4EC00F7B694 /* SquarePostionInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SquarePostionInfo.m; sourceTree = "<group>"; };
 		87BE99A61C2BD14200190D28 /* SquareProblem.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SquareProblem.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		87BE99AA1C2BD14200190D28 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		87BE99AC1C2BD14200190D28 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -72,6 +75,8 @@
 				87BE99C41C2BD17200190D28 /* SquarePlayground.m */,
 				87BE99C01C2BD15900190D28 /* SquareView.h */,
 				87BE99C11C2BD15900190D28 /* SquareView.m */,
+				76DE208E1C33E4EC00F7B694 /* SquarePostionInfo.h */,
+				76DE208F1C33E4EC00F7B694 /* SquarePostionInfo.m */,
 				87BE99B21C2BD14200190D28 /* Main.storyboard */,
 				87BE99B51C2BD14200190D28 /* Assets.xcassets */,
 				87BE99B71C2BD14200190D28 /* LaunchScreen.storyboard */,
@@ -162,6 +167,7 @@
 				87BE99B11C2BD14200190D28 /* ViewController.m in Sources */,
 				87BE99AE1C2BD14200190D28 /* AppDelegate.m in Sources */,
 				87BE99AB1C2BD14200190D28 /* main.m in Sources */,
+				76DE20901C33E4EC00F7B694 /* SquarePostionInfo.m in Sources */,
 				87BE99C21C2BD15900190D28 /* SquareView.m in Sources */,
 				87BE99C51C2BD17200190D28 /* SquarePlayground.m in Sources */,
 			);
@@ -312,6 +318,7 @@
 				87BE99BF1C2BD14200190D28 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

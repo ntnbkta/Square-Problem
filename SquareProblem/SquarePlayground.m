@@ -8,29 +8,14 @@
 
 #import "SquarePlayground.h"
 #import "SquareView.h"
+#import "SquarePostionInfo.h"
 
 #define SQUARE_SIZE 50
-
-typedef NS_ENUM(NSInteger) {
-    SqaurePositionNone = -1,
-    SqaurePositionLeft,
-    SqaurePositionRight,
-    SqaurePositionBottom,
-    SqaurePositionTop
-}SqaurePosition;
 
 @implementation SquarePlayground
 {
     NSInteger _sqaureCount;
 }
-
-/*
-// Only override drawRect: if you perform custom drawing.
-// An empty implementation adversely affects performance during animation.
-- (void)drawRect:(CGRect)rect {
-    // Drawing code
-}
-*/
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
@@ -130,44 +115,133 @@ typedef NS_ENUM(NSInteger) {
              };
 }
 
-- (CGRect)bestFrameFromPossibleFrames:(NSDictionary *)possibleFrameInfo
-{
+- (NSDictionary *)possiblePositionInfoForSqaureNeighbourTo:(SquareView *)neighbourSqaureview {
+    SquarePostionInfo *leftPositionInfo = [[SquarePostionInfo alloc] init];
+    SquarePostionInfo *rightPositionInfo = [[SquarePostionInfo alloc] init];
+    SquarePostionInfo *topPositionInfo = [[SquarePostionInfo alloc] init];
+    SquarePostionInfo *bottomPositionInfo = [[SquarePostionInfo alloc] init];
     
-    //TODO : Also check if the touch point is on left, right, top or bottom of the already present square. Best frame will be in that direction.
+    CGRect leftFrame = (CGRect){neighbourSqaureview.frame.origin.x+neighbourSqaureview.frame.size.width, neighbourSqaureview.frame.origin.y, neighbourSqaureview.frame.size};
+    leftPositionInfo.boundary = leftFrame;
     
-    CGRect bestFrame = CGRectZero;
+    CGRect rightFrame = (CGRect){neighbourSqaureview.frame.origin.x-neighbourSqaureview.frame.size.width, neighbourSqaureview.frame.origin.y, neighbourSqaureview.frame.size};
+    rightPositionInfo.boundary = rightFrame;
     
-    if (possibleFrameInfo[@"left"] != nil)
-    {
-        bestFrame = CGRectFromString(possibleFrameInfo[@"left"]);
-    }
-    else if (possibleFrameInfo[@"right"] != nil)
-    {
-        bestFrame = CGRectFromString(possibleFrameInfo[@"right"]);
-    }
-    else if (possibleFrameInfo[@"bottom"] != nil)
-    {
-        bestFrame = CGRectFromString(possibleFrameInfo[@"bottom"]);
-    }
-    else if (possibleFrameInfo[@"top"] != nil)
-    {
-        bestFrame = CGRectFromString(possibleFrameInfo[@"top"]);
-    }
+    CGRect topFrame = (CGRect){neighbourSqaureview.frame.origin.x, neighbourSqaureview.frame.origin.y - neighbourSqaureview.frame.size.height, neighbourSqaureview.frame.size};
+    topPositionInfo.boundary = topFrame;
     
-    return bestFrame;
+    CGRect bottomFrame = (CGRect){neighbourSqaureview.frame.origin.x, neighbourSqaureview.frame.origin.y + neighbourSqaureview.frame.size.height, neighbourSqaureview.frame.size};
+    bottomPositionInfo.boundary = bottomFrame;
+    
+    for (SquareView *subView in self.subviews)
+    {
+        if(CGRectIntersectsRect(leftFrame, subView.frame))
+        {
+            leftPositionInfo.square = subView;
+        }
+        
+        if(CGRectIntersectsRect(rightFrame, subView.frame))
+        {
+            rightPositionInfo.square = subView;
+        }
+        
+        if(CGRectIntersectsRect(bottomFrame, subView.frame))
+        {
+            bottomPositionInfo.square = subView;
+        }
+        
+        if(CGRectIntersectsRect(topFrame, subView.frame))
+        {
+            topPositionInfo.square = subView;
+        }
+    }
+
+    NSDictionary *resultDictionary = [NSDictionary dictionaryWithObjectsAndKeys:leftPositionInfo,@"left",rightPositionInfo,@"right",bottomPositionInfo,@"bottom",topPositionInfo,@"top", nil];
+    return resultDictionary;
 }
 
 - (CGRect)bestBestPositionToPlaceSqaure:(SquareView *)sqaureView tappedPosition:(SqaurePosition)tappedPosition
 {
-    CGRect bestFrame = CGRectZero;
-    NSDictionary *possibleFrameInfo = [self possibleFramesForSqaureNeighbourTo:sqaureView];
-    SqaurePosition newPosition = SqaurePositionNone;
-    SquareView *neighbourView = [self getExistingSqaureInFrames:possibleFrameInfo withPositionOfTap:tappedPosition availablePosition:&newPosition];
-    if (neighbourView)
+    __block CGRect bestFrame = CGRectZero;
+    NSDictionary *possiblePositionInfo = [self possiblePositionInfoForSqaureNeighbourTo:sqaureView];
+    
+    // Check if all positions are filled
+    SquareView *leftSquare = (SquareView *)[[possiblePositionInfo objectForKey:@"left"] square];
+    SquareView *rightSquare = (SquareView *)[[possiblePositionInfo objectForKey:@"right"] square];
+    SquareView *topSquare = (SquareView *)[[possiblePositionInfo objectForKey:@"top"] square];
+    SquareView *bottomSquare = (SquareView *)[[possiblePositionInfo objectForKey:@"bottom"] square];
+    
+    if (leftSquare && rightSquare && topSquare && bottomSquare)
     {
-        bestFrame = [self bestBestPositionToPlaceSqaure:neighbourView tappedPosition:tappedPosition];
+        // Check if neighbours of Left is Free
+        [self checkNeighboursAndGetBestPositionForSquare:leftSquare tappedPosition:tappedPosition onCompletion:^(SqaurePosition position, CGRect availableFrame) {
+            if (position == SqaurePositionNone)
+            {
+                [self checkNeighboursAndGetBestPositionForSquare:rightSquare tappedPosition:tappedPosition onCompletion:^(SqaurePosition position, CGRect availableFrame) {
+                    if (position == SqaurePositionNone)
+                    {
+                        [self checkNeighboursAndGetBestPositionForSquare:topSquare tappedPosition:tappedPosition onCompletion:^(SqaurePosition position, CGRect availableFrame) {
+                            if (position == SqaurePositionNone)
+                            {
+                                [self checkNeighboursAndGetBestPositionForSquare:bottomSquare tappedPosition:tappedPosition onCompletion:^(SqaurePosition position, CGRect availableFrame) {
+                                    if (position == SqaurePositionNone)
+                                    {
+                                        bestFrame = [self bestBestPositionToPlaceSqaure:leftSquare tappedPosition:tappedPosition];
+                                    }
+                                    else {
+                                        bestFrame = availableFrame;
+                                    }
+                                }];
+                            }
+                            else {
+                                bestFrame = availableFrame;
+                            }
+                        }];
+                    }
+                    else {
+                        bestFrame = availableFrame;
+                    }
+                }];
+            }
+            else {
+                bestFrame = availableFrame;
+            }
+            
+        }];
     }
     else {
+        // One of the position is free, get the best one
+        if (!leftSquare)
+        {
+            bestFrame = [[possiblePositionInfo objectForKey:@"left"] boundary];
+        }
+        else if (!rightSquare)
+        {
+            bestFrame = [[possiblePositionInfo objectForKey:@"right"] boundary];
+        }
+        else if (!topSquare)
+        {
+            bestFrame = [[possiblePositionInfo objectForKey:@"top"] boundary];
+        }
+        else
+        {
+            bestFrame = [[possiblePositionInfo objectForKey:@"bottom"] boundary];
+        }
+    }
+    
+    
+    NSLog(@"******* Best Frame = %@", NSStringFromCGRect(bestFrame));
+    return bestFrame;
+}
+
+- (void)checkNeighboursAndGetBestPositionForSquare:(SquareView *)sqaureView tappedPosition:(SqaurePosition)tappedPosition onCompletion:(void (^)(SqaurePosition position, CGRect bestFrame))completionHandler
+{
+    NSDictionary *possibleFrameInfo = [self possibleFramesForSqaureNeighbourTo:sqaureView];
+    SqaurePosition newPosition = SqaurePositionNone;
+    CGRect bestFrame = CGRectZero;
+    SquareView *neighbourView = [self getExistingSqaureInFrames:possibleFrameInfo withPositionOfTap:tappedPosition availablePosition:&newPosition];
+    if (newPosition != SqaurePositionNone)
+    {
         switch (newPosition)
         {
             case SqaurePositionLeft:
@@ -196,7 +270,7 @@ typedef NS_ENUM(NSInteger) {
         }
     }
     
-    return bestFrame;
+    completionHandler(newPosition, bestFrame);
 }
 
 - (SquareView *)getExistingSqaureInFrames:(NSDictionary *)possiblePositions withPositionOfTap:(SqaurePosition)tappedPosition availablePosition:(SqaurePosition *)availablePos
@@ -261,21 +335,50 @@ typedef NS_ENUM(NSInteger) {
     }
     else {
         /* Some place is free, find the best one */
-        if (!leftSqaureView)
+        switch (tappedPosition)
         {
-            *availablePos = SqaurePositionLeft;
+            case SqaurePositionLeft:
+                if (!leftSqaureView) {
+                    *availablePos = SqaurePositionLeft;
+                }
+                break;
+            case SqaurePositionRight:
+                if (!rightSqaureView) {
+                    *availablePos = SqaurePositionRight;
+                }
+
+                break;
+            case SqaurePositionTop:
+                if (!topSqaureView) {
+                    *availablePos = SqaurePositionTop;
+                }
+                break;
+            case SqaurePositionBottom:
+                if (!bottomSqaureView) {
+                    *availablePos = SqaurePositionBottom;
+                }
+                break;
+            default:
+                break;
         }
-        else if (!rightSqaureView)
-        {
-            *availablePos = SqaurePositionRight;
-        }
-        else if (!bottomSqaureView)
-        {
-            *availablePos = SqaurePositionBottom;
-        }
-        else if (!topSqaureView)
-        {
-            *availablePos = SqaurePositionTop;
+        
+        if (*availablePos == SqaurePositionNone) {
+            if (!leftSqaureView)
+            {
+                *availablePos = SqaurePositionLeft;
+            }
+            else if (!rightSqaureView)
+            {
+                *availablePos = SqaurePositionRight;
+            }
+            else if (!bottomSqaureView)
+            {
+                *availablePos = SqaurePositionBottom;
+            }
+            else if (!topSqaureView)
+            {
+                *availablePos = SqaurePositionTop;
+            }
         }
     }
     
